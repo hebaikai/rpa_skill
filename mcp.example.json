@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "uivision": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "uivision-mcp-bridge"]
+    }
+  }
+}
