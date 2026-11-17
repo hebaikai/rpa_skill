@@ -1,0 +1,10 @@
+- insert:
+    - id: uivision-rpa-mcp
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: uivision
+        transport: stdio
+        command: npx
+        args: ['-y', 'uivision-mcp-bridge']
+        startupTimeoutMs: 120000
+        toolCallTimeoutMs: 900000

@@ -1,0 +1,12 @@
+{
+  "name": "@local/uivision-rpa-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Connect DeepSeek Harness to the official local Ui.Vision bridge",
+  "files": ["cordis.patch.yml"],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

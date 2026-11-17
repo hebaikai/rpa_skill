@@ -1,23 +1,16 @@
 ---
 name: uivision-rpa
-display_name: "Ui.Vision 网页与桌面自动化"
-display_name_en: "Ui.Vision Browser and Desktop Automation"
 description: "使用本机 Ui.Vision RPA 和官方 MCP，把中文任务变成可执行、可复用的浏览器或桌面流程。用于后台报表下载、网页表格提取、表单预填、运行或修复已有自动化宏。普通网页问答不使用此技能。"
-description_zh: "用中文指挥 Ui.Vision 执行网页和桌面任务，并保存流程供下次复用。"
-description_en: "Run and reuse browser and desktop workflows through the local Ui.Vision MCP bridge."
-version: "1.0.0"
-author: "hebaikai/rpa_skill"
-examples_zh:
-  - "用 Ui.Vision 下载当前后台的昨日报表，保存为可重复运行的宏。"
-  - "把这三条资料填到当前表单，先别提交。"
-  - "运行一次仅输出 UIVISION_SKILL_OK 的 Ui.Vision 连接测试。"
+metadata:
+  author: "hebaikai/rpa_skill"
+  version: "1.1.0"
 ---
 
 # Ui.Vision RPA
 
-## 接入 WorkBuddy 的本机浏览器
+## 连接本机浏览器
 
-- 使用当前任务里加载的 `uivision` 连接器，先调用 `bridge_status`。未加载、未连接或用户要求测试时，按下方“连通与首次测试”处理。只报告已确认的状态，不能用其他浏览器工具代跑后声称 Ui.Vision 已成功。
+- 使用当前会话里的 `uivision` MCP 服务，先调用 `bridge_status`。各客户端显示的工具前缀可能不同，以会话实际工具为准。未加载、未连接或用户要求测试时，按下方“连通与首次测试”处理。报告 Ui.Vision 工具实际确认的状态。
 - 多个浏览器或个人资料已连接时，选择与任务一致的实例；必要时调用 `select_browser`。核对实际标签页、站点和账号。登录、验证码或二次验证交给用户在浏览器完成。
 - 仅在需要控制桌面软件、系统对话框或直接调用 Ui.Vision 本地文件 API 时要求 XModules v2。浏览器自身的下载不以 XModules 为前提。
 
@@ -33,7 +26,7 @@ examples_zh:
 
 ## 连通与首次测试
 
-- 没有 `uivision` 工具：在 WorkBuddy 桌面端进入 **专家·技能·连接器 → 连接器 → 自定义连接器 → 配置 MCP**。在 `mcpServers` 中添加 `"uivision": {"type":"stdio","command":"npx","args":["-y","uivision-mcp-bridge"]}`，保留其他条目。需要 Node.js 18+，保存后信任、启用并重启 WorkBuddy；必要时在任务输入框添加该连接器。
+- 没有 `uivision` 工具时，按当前客户端的 [接入手册](https://github.com/hebaikai/rpa_skill#readme) 注册本地 `stdio` 服务。启动命令是 `npx -y uivision-mcp-bridge`，需要 Node.js 18+。提醒用户启用服务并重新打开本地会话；已注册时检查加载和信任状态。
 - 工具存在但扩展未连：在同一台电脑的目标浏览器打开 Ui.Vision 侧栏，在 **Settings → AI → MCP bridge (Claude Code)** 启用并点 **Test**。保持侧栏打开，默认端口 `50888`。除非明确需要配对否则留空 Token；需要时由用户在本机输入。只汇报 `bridge_status` 的连接状态，不转述可能返回的配对信息。
 - 用户要求测试时，请其在目标浏览器打开普通测试页，例如 `https://example.com/`。确认连接、读取编写指南后，调用 `run_macro` 运行内联脚本：
 
@@ -43,4 +36,4 @@ examples_zh:
 
   测试不保存宏，也不操作网页控件；只在工具成功且执行日志中出现 `UIVISION_SKILL_OK` 时报告端到端连通，扩展 **Test** 变绿仅说明浏览器侧已连接。
 
-[Ui.Vision MCP 官方指南](https://ui.vision/mcp) · [WorkBuddy MCP 配置](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/MCP-Guide)
+[Ui.Vision MCP 官方指南](https://ui.vision/mcp)
