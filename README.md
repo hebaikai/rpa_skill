@@ -82,11 +82,20 @@
 
 ## 排查连接
 
+开始任务时，Skill 会检查 `127.0.0.1:50888`（使用自定义端口时按实际配置检查）。如果端口未监听，先尝试让当前客户端启动或重新加载已注册的 `uivision`，然后复查端口、扩展状态和 `UIVISION_SKILL_OK` 日志。需要你配合时，助手会指出具体卡住的步骤。Windows 可以在浏览器所在电脑的 PowerShell 手动检查。
+
+```powershell
+Test-NetConnection 127.0.0.1 -Port 50888 -InformationLevel Quiet
+```
+
+在本机运行时，`True` 表示 TCP 端口可达。用 `bridge_status` 检查 Ui.Vision 和目标浏览器，再用测试宏确认执行正常。[Ui.Vision 官方连接指南](https://ui.vision/mcp)
+
 | 看到的现象 | 怎么处理 |
 | --- | --- |
 | 找不到技能 | 核对客户端对应目录下是 `uivision-rpa/SKILL.md`，或确认 ZIP 已在客户端启用。打开新会话并点名技能。 |
+| MCP 已注册，但端口未监听 | 在客户端启用或重新加载 `uivision`。Codex 从 **设置 → MCP servers** 重载，界面没有此入口时，完全退出并重开 Codex。`--setup` 只负责注册，客户端启动桥接后才会监听。 |
 | MCP 启动失败 | 确认终端中的 `node --version` 和 `npx --version` 可用。Windows 可用 `npx.cmd --version` 检查。如果终端可执行但客户端报找不到 `npx`，试用 `cmd.exe` 和参数 `["/d", "/c", "npx.cmd", "-y", "uivision-mcp-bridge"]`。 |
-| 客户端看得到工具，但扩展 Test 未连接 | 检查同一台电脑上的目标浏览器侧栏、桥接开关和默认端口。若扩展明确要求配对，在本机扩展里输入令牌。 |
+| 端口可达，但扩展 Test 未连接 | 检查 `bridge_status`，再核对目标浏览器的侧栏开关和端口。若扩展明确要求配对，在本机扩展里输入令牌。 |
 | 多个浏览器已连接 | 告诉 Agent 使用哪个浏览器和业务账号，并对照 Ui.Vision 侧栏里的连接标签。 |
 | 网页能跑，桌面或本地文件任务失败 | 确认已装 XModules v2，并查看扩展的 Desktop Automation 自检。 |
 

@@ -3,14 +3,14 @@ name: uivision-rpa
 description: "使用本机 Ui.Vision RPA 和官方 MCP，把中文任务变成可执行、可复用的浏览器或桌面流程。用于后台报表下载、网页表格提取、表单预填、运行或修复已有自动化宏。普通网页问答不使用此技能。"
 metadata:
   author: "hebaikai/rpa_skill"
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Ui.Vision RPA
 
 ## 连接本机浏览器
 
-- 使用当前会话里的 `uivision` MCP 服务，先调用 `bridge_status`。各客户端显示的工具前缀可能不同，以会话实际工具为准。未加载、未连接或用户要求测试时，按下方“连通与首次测试”处理。报告 Ui.Vision 工具实际确认的状态。
+- 每次开始任务时，先按下方“端口与连通测试”检查本机桥接端口和 `bridge_status`。各客户端显示的工具前缀可能不同，以会话中的实际工具为准。确认目标浏览器已连接后再执行任务。
 - 多个浏览器或个人资料已连接时，选择与任务一致的实例；必要时调用 `select_browser`。核对实际标签页、站点和账号。登录、验证码或二次验证交给用户在浏览器完成。
 - 仅在需要控制桌面软件、系统对话框或直接调用 Ui.Vision 本地文件 API 时要求 XModules v2。浏览器自身的下载不以 XModules 为前提。
 
@@ -24,16 +24,17 @@ metadata:
 
 运行中用户要停止时，请其按 Ui.Vision 侧栏的 **STOP**，核对已生效步骤；再次运行前需重新开启桥接。
 
-## 连通与首次测试
+## 端口与连通测试
 
-- 没有 `uivision` 工具时，按当前客户端的 [接入手册](https://github.com/hebaikai/rpa_skill#readme) 注册本地 `stdio` 服务。启动命令是 `npx -y uivision-mcp-bridge`，需要 Node.js 18+。提醒用户启用服务并重新打开本地会话；已注册时检查加载和信任状态。
-- 工具存在但扩展未连：在同一台电脑的目标浏览器打开 Ui.Vision 侧栏，在 **Settings → AI → MCP bridge (Claude Code)** 启用并点 **Test**。保持侧栏打开，默认端口 `50888`。除非明确需要配对否则留空 Token；需要时由用户在本机输入。只汇报 `bridge_status` 的连接状态，不转述可能返回的配对信息。
-- 用户要求测试时，请其在目标浏览器打开普通测试页，例如 `https://example.com/`。确认连接、读取编写指南后，调用 `run_macro` 运行内联脚本：
+1. **查端口。** 在与目标浏览器同一台电脑上检查 `127.0.0.1:50888`，有自定义端口时按实际配置检查。Windows 可用 `Test-NetConnection 127.0.0.1 -Port 50888 -InformationLevel Quiet`，macOS 或 Linux 可用 `nc -z -w 2 127.0.0.1 50888`。工具可用时调用 `bridge_status`，这也能触发按需启动的客户端。终端不在同一台电脑或端口探测受限时，以 MCP 实际连接状态为准。已经连上的会话可直接使用，首次接入或恢复后按第 4 步测试。
+2. **启动桥接后复查。** 端口未监听或会话没有 `uivision` 工具时，先从当前客户端启动或重载已注册的 `uivision`，由客户端用 `npx -y uivision-mcp-bridge` 启动本地 `stdio` 进程。检查注册、启用状态、Node.js 18+、`npx` 和 MCP 启动错误。没注册时按 [接入手册](https://github.com/hebaikai/rpa_skill#readme) 添加。Codex 优先从 **设置 → MCP servers** 重载，需要完全退出重开时请用户操作。等待启动完成后复测端口并检查 `bridge_status`。`--setup` 只注册服务，另开终端运行一份桥接也无法给当前会话加载 MCP。监听仅限回环地址。端口冲突时先识别占用进程，避免影响其他服务。
+3. **接上目标浏览器。** 桥接启动后，用 `bridge_status` 核对目标浏览器。如果扩展未连接，且可用 `open_panel` 唤醒已明确的目标浏览器，可尝试打开侧栏并复查。仍未连上时，请用户在目标浏览器的 **Settings → AI → MCP bridge** 开启并点 **Test**，保持侧栏打开。扩展只有明确要求配对时才在本机输入令牌。只汇报连接状态，略过工具输出中的配对信息。
+4. **测试执行。** 首次接入、重新启动桥接、恢复浏览器连接或用户要求测试时，在目标浏览器的测试页或本次任务已打开的网页上调用 `run_macro` 运行以下内联测试。尚未读取编写指南时先调用 `get_authoring_guide`。
 
-  ```json
-  {"script": "uiv.log('UIVISION_SKILL_OK');", "look": "none"}
-  ```
+   ```json
+   {"script": "uiv.log('UIVISION_SKILL_OK');", "look": "none"}
+   ```
 
-  测试不保存宏，也不操作网页控件；只在工具成功且执行日志中出现 `UIVISION_SKILL_OK` 时报告端到端连通，扩展 **Test** 变绿仅说明浏览器侧已连接。
+   端口可达和侧栏 **Test** 通过分别说明对应环节已通。只有工具成功且执行日志出现 `UIVISION_SKILL_OK`，才确认宏可执行并继续原任务。测试只写日志。若修复后仍失败，告诉用户卡在端口、MCP 加载、扩展配对还是宏执行，附已查到的不含凭证的错误和一个具体下一步，然后等用户完成需要配合的操作。
 
 [Ui.Vision MCP 官方指南](https://ui.vision/mcp)
